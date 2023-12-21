@@ -1,0 +1,177 @@
+{% load static %}
+{% load support_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{{title}}</title>
+	<link type="text/css" href="{% static 'support/css/styles.css' %}" rel="stylesheet" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link rel="shortcut icon" href="{% static 'support/images/main.ico' %}" type="image/x-icon"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<table class="table-page" border=0 cellpadding="0" cellspacing="0">
+<tr><td valign=top>
+
+	{% block mainmenu %}
+		<div class="header">
+			<ul id="mainmenu" class="mainmenu">
+				{% if request.user.is_authenticated %}
+			<li class="logo"><a href="{% url 'home' %}">SFS<div class="logo"></div></a></li>
+{% for m in menu %}
+				<li><a href="{% url m.url_name %}">{{m.title}}</a></li>
+
+
+
+{% endfor %}
+				{% if request.user.is_superuser %}
+				<li><a href="{% url 'add_page' %}">Add Page</a></li>
+				<li><a href="{% url 'admin:index' %}"> Admin Panel</a> </li>
+				{% endif %}
+				{% else %}
+				<li class="logo"><a href="#">SFS<div class="logo"></div></a></li>
+				<li class="logo"><a href="{% url 'about' %}">About us<div class="logo"></div></a></li>
+				<li class="logo"><a href="{% url 'contact' %}">Contact<div class="logo"></div></a></li>
+
+
+				{% endif %}
+
+				{% if request.user.is_authenticated %}
+				<li class="last"> {{user.username}} | <a href="{% url 'logout' %}">Logout</a></li>
+				{% else %}
+				<li class="last"><a href="{% url 'register' %}">Registration</a> | <a href="{% url 'login' %}">Login</a></li>
+				{% endif %}
+			</ul>
+			<div class="clear"></div>
+		</div>
+{% endblock mainmenu %}
+
+
+<table class="table-content" border=0 cellpadding="0" cellspacing="0">
+<tr>
+
+<!-- Sidebar слева -->
+	{% if request.user.is_authenticated %}
+
+	<td valign="top" class="left-chapters">
+	<ul id="leftchapters">
+{% if cat_selected == 0 %}
+		<li class="selected">All categories</li>
+{% else %}
+		<li><a href="{% url 'home' %}">All categories</a></li>
+{% endif %}
+
+{% for c in cats %}
+{% if c.support__count > 0 %}
+	{% if c.pk == cat_selected %}
+		<li class="selected">{{c.name}}</li>
+	{% else %}
+		<li><a href="{{ c.get_absolute_url }}">{{c.name}}</a></li>
+	{% endif %}
+{% endif %}
+{% endfor %}
+
+
+	</ul>
+</td>
+<!-- Конец Sidebar'а -->
+	{% else %}
+
+	{% endif %}
+<td valign="top" class="content">
+	<!-- Хлебные крошки -->
+	{% block breadcrumbs %}
+	{% endblock %}
+
+<!-- Блок контента -->
+	<div class="content-text">
+{% block content %}
+{% endblock %}
+		{% if request.user.is_authenticated %}
+
+		{% if page_obj.has_other_pages %}
+<nav class="list-pages">
+    <ul>
+{% if page_obj.has_previous %}
+<li class="page-num">
+	<a href="?page={{ page_obj.previous_page_number }}">&lt;</a>
+</li>
+{% endif %}
+
+        {% for p in paginator.page_range %}
+
+		{% if page_obj.number == p %}
+        <li class="page-num page-num-selected">{{ p }}</li>
+		{% elif p >= page_obj.number|add:-2 and p <= page_obj.number|add:2  %}
+        <li class="page-num">
+            <a href="?page={{ p }}">{{ p }}</a>
+        </li>
+		{% endif %}
+        {% endfor %}
+
+{% if page_obj.has_next %}
+<li class="page-num">
+	<a href="?page={{ page_obj.next_page_number }}">&gt;</a>
+</li>
+{% endif %}
+
+    </ul>
+</nav>
+{% endif %}
+	</div>
+	{% else %}
+	{% endif %}
+<!-- Конец блока контента -->
+
+
+</td></tr></table>
+</td></tr>
+<!-- Footer -->
+<tr><td valign=top>
+<body>
+    <footer>
+        <div class="f-item-con">
+            <div class="app-info">
+                <span class='app-name'>
+                    <span class='app-initial'>S</span>FS
+                </span>
+                <p>We give an opportunity <strong>Find all answers</strong> For all questions</p>
+            </div>
+            <div class="useful-links">
+                <div class="footer-title">Useful Links</div>
+                <ul>
+                    <li>Main</li>
+                    <li>About</li>
+                    <li>About Us</li>
+
+                </ul>
+            </div>
+            <div class="help-sec">
+                <div class="footer-title">Help</div>
+                <ul>
+                    <li>Feedback</li>
+                </ul>
+            </div>
+            <div class="g-i-t">
+                <div class="footer-title">Get in Touch</div>
+                <form  class="space-y-2">
+					                    {% csrf_token %}
+
+                    <input type="text" name="g-name" class="g-inp" id="g-name" placeholder='Name' />
+                    <input type="email" name="g-email" class="g-inp" id="g-email" placeholder='Email' />
+                    <textarea type="text" name="g-msg" class="g-inp h-40 resize-none" id="g-msg"
+                        placeholder='Message...'></textarea>
+                    <button type="submit" class='f-btn'>Submit</button>
+                </form>
+            </div>
+        </div>
+        <div class='cr-con'>Copyright &copy; 2023 | Made by SFS</div>
+    </footer>
+
+</body>
+
+
+</td></tr></table>
+<!-- Конец footer'а и страницы -->
+</body>
+</html>
